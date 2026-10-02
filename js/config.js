@@ -12,7 +12,7 @@ export const TASKS = [
   { id:'visit-site',    icon:'🌐', title:'Odwiedź stronę',            desc:'Wejdź na naszą stronę główną i rozejrzyj się przez chwilę.',  pts:10, url:'https://example.com',           gradient:'from-violet-500/30 to-indigo-700/30' },
   { id:'visit-partner', icon:'🤝', title:'Odwiedź naszego partnera',  desc:'Poznaj ofertę naszego partnera biznesowego.',                 pts:20, url:'https://partner.example.com',   gradient:'from-cyan-500/30 to-blue-700/30' },
   { id:'check-offer',   icon:'🏷️', title:'Sprawdź ofertę',            desc:'Zapoznaj się z aktualną ofertą specjalną tygodnia.',          pts:25, url:'https://example.com/oferta',    gradient:'from-fuchsia-500/30 to-purple-700/30' },
-  { id:'join-discord',  icon:'💬', title:'Odwiedź naszego Discorda',  desc:'Dołącz do naszej społeczności i przywitaj się na #general.',  pts:30, url:'https://discord.gg/example',    gradient:'from-indigo-500/30 to-violet-700/30' },
+  { id:'join-discord',  icon:'💬', title:'Odwiedź naszego Discorda',  desc:'Dołącz do naszej społeczności i przywitaj się na #general.',  pts:30, url:'https://discord.gg/3qW5nSKdCZ',    gradient:'from-indigo-500/30 to-violet-700/30' },
   { id:'share-page',    icon:'📣', title:'Udostępnij stronę',         desc:'Podziel się naszą stroną w mediach społecznościowych.',       pts:50, url:'https://example.com/share',     gradient:'from-emerald-500/30 to-teal-700/30' },
 ];
 

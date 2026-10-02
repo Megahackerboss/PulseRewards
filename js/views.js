@@ -126,7 +126,7 @@ export function renderTasks() {
     <header class="flex flex-wrap items-end justify-between gap-4">
       <div>
         <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Zdobądź punkty</h1>
-        <p class="mt-2 text-white/50 text-sm sm:text-base">Wykonuj zadania, a punkty trafią prosto do Twojej bazy Firestore.</p>
+        <p class="mt-2 text-white/50 text-sm sm:text-base">Kliknij „Wykonaj”, odwiedź stronę i wróć odebrać punkty.</p>
       </div>
       <div class="glass rounded-2xl px-5 py-3">
         <p class="text-[10px] font-bold uppercase tracking-widest text-white/40">Ukończone</p>
@@ -140,19 +140,28 @@ export function renderTasks() {
 }
 
 function taskCard(task) {
-  const status = store.state.tasks?.[task.id] || 'available';
-  const done = status === 'done';
+  const isDone = store.state.tasks?.[task.id] === 'done';
+  const uid = store.currentUser?.uid || 'guest';
+  const isPending = !isDone && (store.pendingTasks?.[task.id] || localStorage.getItem(`task_pending_${uid}_${task.id}`) === 'true');
+
+  const status = isDone ? 'done' : (isPending ? 'pending' : 'available');
+
   const statusMap = {
     available: ['Dostępne', 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20'],
+    pending:   ['W trakcie', 'bg-amber-400/10 text-amber-300 border-amber-400/20 animate-pulse'],
     done:      ['Wykonane',  'bg-white/5 text-white/35 border-white/10'],
   };
-  const [statusLabel, statusCls] = statusMap[status] || statusMap.available;
-  const button = done
+  const [statusLabel, statusCls] = statusMap[status];
+
+  // Przyciski zależne od faktycznego stanu
+  const button = isDone
     ? `<button class="btn btn-ghost px-4 py-2.5 text-sm" disabled>✓ Wykonane</button>`
-    : `<button class="btn btn-primary px-4 py-2.5 text-sm" data-action="task-claim" data-id="${task.id}">Odbierz +${task.pts} PTS</button>`;
+    : isPending
+      ? `<button class="btn btn-primary px-4 py-2.5 text-sm" data-action="task-claim" data-id="${task.id}">Odbierz +${task.pts} PTS</button>`
+      : `<button class="btn btn-primary px-4 py-2.5 text-sm" data-action="task-start" data-id="${task.id}">Wykonaj</button>`;
 
   return `
-  <article class="glass card rounded-2xl p-5 flex flex-col ${done ? 'opacity-60' : ''}">
+  <article class="glass card rounded-2xl p-5 flex flex-col ${isDone ? 'opacity-60' : ''}">
     <div class="flex items-start justify-between gap-3">
       <div class="w-12 h-12 rounded-2xl grid place-items-center text-2xl bg-gradient-to-br ${task.gradient} shadow-glowSm">${task.icon}</div>
       <span class="text-xs font-extrabold text-violet-200 bg-violet-500/10 border border-violet-400/25 rounded-full px-3 py-1.5 tabular-nums">+${task.pts} PTS</span>

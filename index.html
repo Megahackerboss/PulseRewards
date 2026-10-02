@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PulseRewards — Zbieraj punkty. Odbieraj nagrody.</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+        boxShadow: {
+          glow:   '0 10px 40px -10px rgba(124,92,255,.55)',
+          glowSm: '0 6px 20px -6px rgba(124,92,255,.55)',
+          gold:   '0 10px 40px -10px rgba(250,204,21,.55)',
+        }
+      }
+    }
+  }
+</script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="antialiased selection:bg-violet-500/40">
+
+<canvas id="confetti"></canvas>
+
+<!-- AUTH GATE -->
+<div id="auth-gate" class="fixed inset-0 z-[100] grid place-items-center p-4 bg-[#04050d]/95 backdrop-blur-xl">
+  <div class="glass rounded-3xl w-full max-w-md p-7 sm:p-9 relative overflow-hidden modal-card">
+    <div class="absolute -top-24 -right-16 w-64 h-64 rounded-full bg-violet-600/30 blur-3xl"></div>
+    <div class="absolute -bottom-28 -left-20 w-64 h-64 rounded-full bg-cyan-500/20 blur-3xl"></div>
+
+    <div class="relative">
+      <div class="flex items-center gap-3">
+        <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 grid place-items-center shadow-glowSm">
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z"/>
+          </svg>
+        </span>
+        <span class="font-extrabold text-lg tracking-tight">Pulse<span class="text-violet-400">Rewards</span></span>
+      </div>
+
+      <div class="mt-6 flex bg-white/5 p-1 rounded-xl border border-white/10 text-xs font-semibold">
+        <button id="auth-tab-register" class="flex-1 py-2 rounded-lg bg-violet-600 text-white transition">Rejestracja</button>
+        <button id="auth-tab-login" class="flex-1 py-2 rounded-lg text-white/50 hover:text-white transition">Logowanie</button>
+      </div>
+
+      <h1 id="auth-title" class="mt-5 text-2xl font-extrabold tracking-tight leading-tight">
+        Dołącz do programu i zbieraj punkty
+      </h1>
+      <p id="auth-desc" class="mt-2 text-xs text-white/50 leading-relaxed">
+        Załóż konto i zgarnij <span class="text-violet-300 font-semibold">+50 PTS</span> bonusu startowego w Firebase.
+      </p>
+
+      <form id="auth-form" class="mt-6 space-y-3.5">
+        <div id="auth-group-username">
+          <label for="auth-username" class="block text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1.5">
+            Nazwa użytkownika
+          </label>
+          <input id="auth-username" class="field" maxlength="20" placeholder="np. NeonFox" autocomplete="nickname">
+        </div>
+
+        <div>
+          <label for="auth-email" class="block text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1.5">
+            Adres E-mail
+          </label>
+          <input id="auth-email" type="email" class="field" required placeholder="twoj@email.pl" autocomplete="email">
+        </div>
+
+        <div>
+          <label for="auth-password" class="block text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1.5">
+            Hasło (min. 6 znaków)
+          </label>
+          <input id="auth-password" type="password" class="field" required minlength="6" placeholder="••••••••" autocomplete="current-password">
+        </div>
+
+        <div id="auth-error" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl p-3"></div>
+
+        <button id="auth-submit-btn" type="submit" class="btn btn-primary w-full py-3.5 mt-2">
+          🎁 Zarejestruj się i odbierz +50 PTS
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- NAWIGACJA -->
+<header class="fixed top-0 inset-x-0 z-50">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <nav class="mt-3 glass rounded-2xl h-16 px-3 sm:px-5 flex items-center gap-3">
+      <button data-action="nav" data-nav="dashboard" class="flex items-center gap-2.5 shrink-0">
+        <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 grid place-items-center shadow-glowSm">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z"/>
+          </svg>
+        </span>
+        <span class="hidden sm:block font-extrabold tracking-tight text-[17px]">
+          Pulse<span class="text-violet-400">Rewards</span>
+        </span>
+      </button>
+
+      <div id="nav-links" class="hidden lg:flex items-center gap-1 mx-auto"></div>
+
+      <div class="flex items-center gap-2 ml-auto lg:ml-0">
+        <div class="glass rounded-xl px-3 py-2 flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="nav-points" class="font-bold text-sm tabular-nums">0</span>
+          <span class="text-[10px] text-white/40 font-bold tracking-wider">PTS</span>
+        </div>
+
+        <div class="relative" id="profile-wrap">
+          <button data-action="toggle-profile"
+                  class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400
+                         grid place-items-center font-bold text-sm shadow-glowSm
+                         hover:brightness-110 transition">
+            <span id="nav-avatar">U</span>
+          </button>
+
+          <div id="profile-menu" class="hidden absolute right-0 mt-3 w-60 glass rounded-2xl p-2 shadow-2xl z-50">
+            <div class="px-3 py-2.5">
+              <p id="profile-username" class="font-semibold text-sm truncate">—</p>
+              <p id="profile-email" class="text-xs text-white/40 truncate">—</p>
+            </div>
+            <div class="h-px bg-white/10 my-1"></div>
+            <button data-action="nav" data-nav="profile" class="menu-item">Profil i kody</button>
+            <button data-action="nav" data-nav="history" class="menu-item">Historia</button>
+            <div class="h-px bg-white/10 my-1"></div>
+            <button data-action="logout" class="menu-item text-rose-300">Wyloguj się</button>
+          </div>
+        </div>
+
+        <button data-action="toggle-mobile" class="lg:hidden w-10 h-10 rounded-xl glass grid place-items-center">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+        </button>
+      </div>
+    </nav>
+    <div id="mobile-menu" class="lg:hidden hidden mt-2 glass rounded-2xl p-2"></div>
+  </div>
+</header>
+
+<!-- WIDOKI -->
+<main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-28 pb-20">
+  <section id="view-dashboard" class="view active"></section>
+  <section id="view-tasks"     class="view"></section>
+  <section id="view-lootboxes" class="view"></section>
+  <section id="view-rewards"   class="view"></section>
+  <section id="view-history"   class="view"></section>
+  <section id="view-profile"   class="view"></section>
+
+  <footer class="mt-20 pt-8 border-t border-white/5 text-center">
+    <p class="text-xs text-white/25">
+      PulseRewards © <span id="footer-year"></span> — Zabezpieczony generator i realizator kodów.
+    </p>
+  </footer>
+</main>
+
+<div id="toasts" class="fixed top-24 right-4 sm:right-6 z-[92] space-y-2 w-[min(92vw,320px)]"></div>
+<div id="modal-root"></div>
+
+<!-- PUNKT STARTOWY JS -->
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

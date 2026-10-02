@@ -19,19 +19,40 @@ import {
   ptsWord,
   formatDuration
 } from "./ui.js";
-import { renderAll, renderLootboxes } from "./views.js";
+import { renderAll, renderLootboxes, renderTasks } from "./views.js";
 
+// 1. ROZPOCZĘCIE ZADANIA (OTWIERA STRONĘ I ZMIENIA STAN NA "W TRAKCIE")
 export async function startTask(id) {
   const task = TASKS.find(t => t.id === id);
-  if (!task || !store.state || store.state.tasks[id] === 'done') return;
+  if (!task || !store.state || store.state.tasks?.[id] === 'done') return;
+
+  // Otwieramy link w nowej karcie
   window.open(task.url, '_blank', 'noopener,noreferrer');
-  toast('Link otwarty — wróć i kliknij "Odbierz punkty"!', 'info');
+
+  // Zapisujemy lokalnie stan oczekiwania na odebranie
+  if (!store.pendingTasks) store.pendingTasks = {};
+  store.pendingTasks[id] = true;
+
+  const uid = store.currentUser?.uid || 'guest';
+  localStorage.setItem(`task_pending_${uid}_${id}`, 'true');
+
+  // Odświeżamy przyciski w widoku zadań
+  renderTasks();
+  toast('Strona zadania otwarta w nowej karcie! Wróć i kliknij "Odbierz punkty".', 'info');
 }
 
+// 2. ODEBRANIE NAGRODY ZA ZADANIE
 export async function claimTask(id) {
   try {
     toast('Weryfikacja na serwerze…', 'info');
     const result = await fnClaimTask({ taskId: id });
+
+    // Usuwamy stan oczekiwania
+    if (store.pendingTasks) delete store.pendingTasks[id];
+    const uid = store.currentUser?.uid || 'guest';
+    localStorage.removeItem(`task_pending_${uid}_${id}`);
+
+    confetti(100);
     toast(`Zadanie ukończone! +${result.data.pts} PTS`, 'success');
   } catch (err) {
     toast(err.message || 'Błąd odbierania zadania', 'error');
